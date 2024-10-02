@@ -1,6 +1,10 @@
 import { FrameRequest, getFrameHtmlResponse } from "@coinbase/onchainkit/frame";
 import { NextRequest, NextResponse } from "next/server";
-import { kv } from "@vercel/kv";
+
+// In-memory storage for votes (replace with a database in production)
+let yesVotes = 0;
+let noVotes = 0;
+const votedUsers = new Set<string>();
 
 async function getResponse(req: NextRequest): Promise<NextResponse> {
   const body: FrameRequest = await req.json();
@@ -18,19 +22,19 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const hasVoted = await kv.sismember("votedUsers", userId);
-  if (hasVoted) {
+  if (votedUsers.has(userId)) {
+    // User has already voted, show results without buttons
     return getResultsResponse();
   }
 
   // Handle the vote
   if (untrustedData.buttonIndex === 1 || untrustedData.buttonIndex === 2) {
     if (untrustedData.buttonIndex === 1) {
-      await kv.incr("yesVotes");
+      yesVotes++;
     } else {
-      await kv.incr("noVotes");
+      noVotes++;
     }
-    await kv.sadd("votedUsers", userId);
+    votedUsers.add(userId);
     return getResultsResponse();
   }
 
@@ -46,17 +50,10 @@ async function getResponse(req: NextRequest): Promise<NextResponse> {
   );
 }
 
-async function getResultsResponse(): Promise<NextResponse> {
-  const [yesVotes, noVotes] = await Promise.all([
-    kv.get("yesVotes"),
-    kv.get("noVotes"),
-  ]);
-
-  const totalVotes = (Number(yesVotes) || 0) + (Number(noVotes) || 0);
-  const yesPercentage =
-    totalVotes > 0 ? Math.round((Number(yesVotes) / totalVotes) * 100) : 0;
-  const noPercentage =
-    totalVotes > 0 ? Math.round((Number(noVotes) / totalVotes) * 100) : 0;
+function getResultsResponse(): NextResponse {
+  const totalVotes = yesVotes + noVotes;
+  const yesPercentage = Math.round((yesVotes / totalVotes) * 100) || 0;
+  const noPercentage = Math.round((noVotes / totalVotes) * 100) || 0;
 
   const searchParams = new URLSearchParams({
     title: "Current Voting Results",
