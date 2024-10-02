@@ -52,15 +52,21 @@ async function getResultsResponse(): Promise<NextResponse> {
     kv.get("noVotes"),
   ]);
 
-  const totalVotes = (Number(yesVotes) || 0) + (Number(noVotes) || 0);
-  const yesPercentage =
-    totalVotes > 0 ? Math.round((Number(yesVotes) / totalVotes) * 100) : 0;
-  const noPercentage =
-    totalVotes > 0 ? Math.round((Number(noVotes) / totalVotes) * 100) : 0;
+  const yesCount = Number(yesVotes) || 0;
+  const noCount = Number(noVotes) || 0;
+  const totalVotes = yesCount + noCount;
 
+  const yesPercentage =
+    totalVotes > 0 ? Math.round((yesCount / totalVotes) * 100) : 0;
+  const noPercentage =
+    totalVotes > 0 ? Math.round((noCount / totalVotes) * 100) : 0;
+
+  const question = "There will be over 10,000 Kramer predictions before 10/29";
   const searchParams = new URLSearchParams({
-    title: "Current Voting Results",
-    description: `Yes: ${yesPercentage}% | No: ${noPercentage}%`,
+    title: question,
+    description1: "Results:",
+    description2: `Yes: ${yesPercentage}% (${yesCount}) | No: ${noPercentage}% (${noCount})`,
+    // description: `Current Voting Results: \nYes: ${yesPercentage}% (${yesCount}) | No: ${noPercentage}% (${noCount})`,
   });
 
   return new NextResponse(
@@ -68,6 +74,7 @@ async function getResultsResponse(): Promise<NextResponse> {
       image: {
         src: `${process.env.NEXT_PUBLIC_SITE_URL}/og?${searchParams}`,
       },
+      postUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/advanced`,
     })
   );
 }
