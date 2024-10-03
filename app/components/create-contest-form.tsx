@@ -27,6 +27,14 @@ import { CalendarIcon, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
+// Add these imports
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 const formSchema = z.object({
   title: z.string().min(2, {
@@ -42,6 +50,9 @@ export function CreateContestForm() {
   const router = useRouter();
   const [isAnimating, setIsAnimating] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
+  // Add these state variables
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [voteUrl, setVoteUrl] = useState("");
 
   useEffect(() => {
     setIsAnimating(true);
@@ -75,11 +86,9 @@ export function CreateContestForm() {
       setShowConfetti(true);
       setTimeout(() => {
         setShowConfetti(false);
-        const voteUrl = `${window.location.origin}/advanced/${data.voteId}`; // This line is updated
-        navigator.clipboard.writeText(voteUrl).then(() => {
-          alert(`Vote created! URL copied to clipboard: ${voteUrl}`);
-          router.push(voteUrl);
-        });
+        const newVoteUrl = `${window.location.origin}/advanced/${data.voteId}`;
+        setVoteUrl(newVoteUrl);
+        setIsModalOpen(true);
       }, 3000);
     } catch (error) {
       console.error("Error creating vote:", error);
@@ -227,6 +236,35 @@ export function CreateContestForm() {
           </Form>
         </div>
       </motion.div>
+
+      {/* Add the Dialog component */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Vote Created Successfully!</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p>Your vote has been created. Here's the URL:</p>
+            <Input
+              value={voteUrl}
+              readOnly
+              className="mt-2"
+              onClick={(e) => e.currentTarget.select()}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                navigator.clipboard.writeText(voteUrl);
+                setIsModalOpen(false);
+                router.push(voteUrl);
+              }}
+            >
+              Copy URL
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

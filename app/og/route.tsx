@@ -38,7 +38,7 @@ export async function GET(request: Request) {
             padding: "40px",
           }}
         >
-          <p style={{ ...FONT_STYLE, marginBottom: 20, fontSize: 60 }}>
+          <p style={{ ...FONT_STYLE, marginBottom: 20, fontSize: 50 }}>
             {title}
           </p>
           <p style={{ ...FONT_STYLE, marginBottom: 30, fontSize: 50 }}>
@@ -48,7 +48,7 @@ export async function GET(request: Request) {
             results.map((result: any, index: number) => (
               <p
                 key={index}
-                style={{ ...FONT_STYLE, fontSize: 30, marginBottom: 10 }}
+                style={{ ...FONT_STYLE, fontSize: 40, marginBottom: 10 }}
               >
                 {result.option}: {result.percentage}% ({result.count} votes)
               </p>
