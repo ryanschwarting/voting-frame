@@ -226,7 +226,13 @@ export function CreateContestForm() {
                 >
                   <Button
                     type="submit"
-                    className="w-full bg-[#1A1A1A] hover:bg-white text-white hover:text-[#1A1A1A] transition-colors duration-200"
+                    className={`
+                      w-full text-[#1A1A1A] font-bold py-2 px-4 rounded
+                      bg-gradient-to-r from-[#9945FF] via-[#14F195] to-[#9945FF]
+                      bg-[length:200%_100%] hover:bg-[length:100%_100%]
+                      transition-all duration-300 ease-in-out
+                      ${isAnimating ? "animate-gradient-x" : ""}
+                    `}
                   >
                     Create Vote
                   </Button>
