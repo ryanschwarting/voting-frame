@@ -97,8 +97,7 @@ export default function CreateContestPage() {
             Create a Voting Frame on Warpcast
           </h1>
           <p className="text-lg text-gray-300 text-center max-w-2xl">
-            Design and launch your custom voting frame for the Warpcast
-            community
+            Launch your custom voting frame for the Warpcast community
           </p>
         </div>
         <div className="">
