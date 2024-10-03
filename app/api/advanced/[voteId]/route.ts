@@ -89,31 +89,39 @@ async function getResultsResponse(
 ): Promise<NextResponse> {
   const voteData = await kv.hgetall(`vote:${voteId}`);
 
-  if (!voteData || typeof voteData.options !== "string") {
+  if (!voteData || !voteData.options) {
     throw new Error("Invalid vote data");
   }
 
-  const options = voteData.options.split(",");
+  let options: string[];
+  if (typeof voteData.options === "string") {
+    try {
+      options = JSON.parse(voteData.options);
+    } catch {
+      options = voteData.options.split(",");
+    }
+  } else if (Array.isArray(voteData.options)) {
+    options = voteData.options;
+  } else {
+    throw new Error("Invalid options format");
+  }
 
   console.log("Parsed options:", options);
 
   const voteCounts = await Promise.all(
-    options.map((_, index: number) => kv.get(`votes:${voteId}:${index + 1}`))
+    options.map((_, index) => kv.get(`votes:${voteId}:${index + 1}`))
   );
 
   const typedVoteCounts = voteCounts.map((count) => Number(count) || 0);
-  const totalVotes = typedVoteCounts.reduce(
-    (sum: number, count: number) => sum + count,
-    0
-  );
+  const totalVotes = typedVoteCounts.reduce((sum, count) => sum + count, 0);
 
-  const results = options.map((option: string, index: number) => {
+  const results = options.map((option, index) => {
     const count = typedVoteCounts[index];
     const percentage = totalVotes > 0 ? (count / totalVotes) * 100 : 0;
     return {
       option,
       count,
-      percentage: percentage.toFixed(1), // Round to 1 decimal place
+      percentage: percentage.toFixed(1),
     };
   });
 

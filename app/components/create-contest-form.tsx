@@ -35,7 +35,7 @@ const formSchema = z.object({
   deadline: z.date({
     required_error: "A deadline is required.",
   }),
-  options: z.array(z.string()).length(2),
+  options: z.array(z.string().min(1, "Option cannot be empty")).length(2),
 });
 
 export function CreateContestForm() {
@@ -51,7 +51,7 @@ export function CreateContestForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
-      options: ["Yes", "No"],
+      options: ["", ""],
     },
   });
 
@@ -189,7 +189,7 @@ export function CreateContestForm() {
               />
               <div className="space-y-4">
                 <FormLabel className="text-white">Vote Options</FormLabel>
-                {["Yes", "No"].map((option, index) => (
+                {[0, 1].map((index) => (
                   <FormField
                     key={index}
                     control={form.control}
@@ -198,9 +198,9 @@ export function CreateContestForm() {
                       <FormItem>
                         <FormControl>
                           <Input
-                            placeholder={option}
+                            placeholder="Type option"
                             {...field}
-                            className="bg-white text-black"
+                            className="bg-white text-black placeholder-gray-400"
                           />
                         </FormControl>
                         <FormMessage />

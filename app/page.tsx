@@ -93,10 +93,10 @@ export default function CreateContestPage() {
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
       <div className="relative z-10 container mx-auto py-10 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-white text-center mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-white text-center mb-4">
             Create a Voting Frame on Warpcast
           </h1>
-          <p className="text-xl text-gray-300 text-center max-w-2xl">
+          <p className="text-lg text-gray-300 text-center max-w-2xl">
             Design and launch your custom voting frame for the Warpcast
             community
           </p>
