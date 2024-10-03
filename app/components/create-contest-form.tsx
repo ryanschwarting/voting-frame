@@ -173,7 +173,7 @@ export function CreateContestForm() {
                             ) : (
                               <span className="text-gray-400">Pick a date</span>
                             )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-75 text-gray-600" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
