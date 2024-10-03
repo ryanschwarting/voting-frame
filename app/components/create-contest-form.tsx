@@ -171,7 +171,9 @@ export function CreateContestForm() {
                             {field.value ? (
                               format(field.value, "PPP")
                             ) : (
-                              <span className="text-gray-400">Pick a date</span>
+                              <span className="text-gray-400">
+                                Pick a deadline
+                              </span>
                             )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-75 text-gray-600" />
                           </Button>
@@ -181,7 +183,13 @@ export function CreateContestForm() {
                         <Calendar
                           mode="single"
                           selected={field.value}
-                          onSelect={field.onChange}
+                          onSelect={(date) => {
+                            if (date) {
+                              const endOfDay = new Date(date);
+                              endOfDay.setHours(23, 59, 59, 999);
+                              field.onChange(endOfDay);
+                            }
+                          }}
                           disabled={(date) =>
                             date < new Date() || date > new Date("2100-01-01")
                           }
@@ -190,7 +198,7 @@ export function CreateContestForm() {
                       </PopoverContent>
                     </Popover>
                     <FormDescription className="text-gray-300">
-                      This is the expiry date{" "}
+                      This is the expiry date (end of the selected day)
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
