@@ -139,7 +139,7 @@ export function CreateContestForm() {
                     <FormLabel className="text-white">Title</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="The topic of your contest"
+                        placeholder="The topic of your vote"
                         {...field}
                         className="bg-white text-black placeholder-gray-400"
                       />
