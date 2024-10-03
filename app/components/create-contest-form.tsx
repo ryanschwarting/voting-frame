@@ -244,7 +244,7 @@ export function CreateContestForm() {
             <DialogTitle>Vote Created Successfully!</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <p>Your vote has been created. Here's the URL:</p>
+            <p>Your vote has been created. Here is the URL:</p>
             <Input
               value={voteUrl}
               readOnly
