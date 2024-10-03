@@ -3,6 +3,11 @@ import { NextRequest } from "next/server";
 
 export const runtime = "edge";
 
+function formatUTCDeadline(deadline: string) {
+  const date = new Date(deadline);
+  return date.toUTCString();
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const title = searchParams.get("title") || "Default Title";

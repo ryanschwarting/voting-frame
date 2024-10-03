@@ -185,8 +185,17 @@ export function CreateContestForm() {
                           selected={field.value}
                           onSelect={(date) => {
                             if (date) {
-                              const endOfDay = new Date(date);
-                              endOfDay.setHours(23, 59, 59, 999);
+                              const endOfDay = new Date(
+                                Date.UTC(
+                                  date.getUTCFullYear(),
+                                  date.getUTCMonth(),
+                                  date.getUTCDate(),
+                                  23,
+                                  59,
+                                  59,
+                                  999
+                                )
+                              );
                               field.onChange(endOfDay);
                             }
                           }}

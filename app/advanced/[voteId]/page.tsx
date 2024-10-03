@@ -2,6 +2,11 @@ import { getFrameMetadata } from "@coinbase/onchainkit/frame";
 import type { Metadata } from "next";
 import { kv } from "@vercel/kv";
 
+function formatUTCDeadline(deadline: string) {
+  const date = new Date(deadline);
+  return date.toUTCString();
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -37,7 +42,7 @@ export async function generateMetadata({
         process.env.NEXT_PUBLIC_SITE_URL
       }/frame-image?title=${encodeURIComponent(
         title as string
-      )}&deadline=${encodeURIComponent(deadline as string)}`,
+      )}&deadline=${encodeURIComponent(formatUTCDeadline(deadline as string))}`,
     },
     postUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/advanced/${params.voteId}`,
   });

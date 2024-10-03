@@ -11,10 +11,13 @@ export async function POST(request: Request) {
   // Ensure options is an array of strings
   const parsedOptions = Array.isArray(options) ? options : [options];
 
-  // Store options as an array
+  // Convert deadline to UTC
+  const utcDeadline = new Date(deadline);
+
+  // Store options as an array and deadline in UTC
   await kv.hset(`vote:${voteId}`, {
     title,
-    deadline,
+    deadline: utcDeadline.toISOString(),
     options: JSON.stringify(parsedOptions), // Store as JSON string of array
   });
 
