@@ -19,10 +19,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const title =
       searchParams.get("title")?.slice(0, MAX_LENGTH) || "Default Title";
-    const description1 =
-      searchParams.get("description1")?.slice(0, MAX_LENGTH) || "";
-    const description2 =
-      searchParams.get("description2")?.slice(0, MAX_LENGTH) || "";
+    const resultsParam = searchParams.get("results");
+    const results = resultsParam ? JSON.parse(resultsParam) : null;
 
     return new ImageResponse(
       (
@@ -37,11 +35,24 @@ export async function GET(request: Request) {
             backgroundColor: "#2C2C2C",
             fontWeight: 700,
             textAlign: "center",
+            padding: "40px",
           }}
         >
-          <p style={{ ...FONT_STYLE, marginBottom: 30 }}>{title}</p>
-          {description1 && <p style={FONT_STYLE}>{description1}</p>}
-          {description2 && <p style={FONT_STYLE}>{description2}</p>}
+          <p style={{ ...FONT_STYLE, marginBottom: 20, fontSize: 60 }}>
+            {title}
+          </p>
+          <p style={{ ...FONT_STYLE, marginBottom: 30, fontSize: 50 }}>
+            Results:
+          </p>
+          {results &&
+            results.map((result: any, index: number) => (
+              <p
+                key={index}
+                style={{ ...FONT_STYLE, fontSize: 30, marginBottom: 10 }}
+              >
+                {result.option}: {result.percentage}% ({result.count} votes)
+              </p>
+            ))}
         </div>
       ),
       {

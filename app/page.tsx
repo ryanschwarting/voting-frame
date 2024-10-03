@@ -3,10 +3,6 @@
 import { CreateContestForm } from "@/app/components/create-contest-form";
 import { useEffect, useRef } from "react";
 
-import "@farcaster/auth-kit/styles.css";
-import { providers } from "ethers";
-import { AuthKitProvider, SignInButton, useProfile } from "@farcaster/auth-kit";
-
 export default function CreateContestPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -92,38 +88,23 @@ export default function CreateContestPage() {
     };
   }, []);
 
-  const config = {
-    // For a production app, replace this with an Optimism Mainnet
-    // RPC URL from a provider like Alchemy or Infura.
-    relay: "https://relay.farcaster.xyz",
-    rpcUrl: "https://mainnet.optimism.io",
-    domain: "example.com",
-    siweUri: "https://example.com/login",
-    provider: new providers.JsonRpcProvider(undefined, 10),
-  };
-
   return (
     <div className="relative min-h-screen bg-[#1A1A1A] overflow-hidden">
-      <AuthKitProvider config={config}>
-        <div style={{ position: "fixed", top: "12px", right: "12px" }}>
-          <SignInButton />
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
+      <div className="relative z-10 container mx-auto py-10 px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-center justify-center mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold text-white text-center mb-4">
+            Create a Voting Frame on Warpcast
+          </h1>
+          <p className="text-xl text-gray-300 text-center max-w-2xl">
+            Design and launch your custom voting frame for the Warpcast
+            community
+          </p>
         </div>
-        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
-        <div className="relative z-10 container mx-auto py-10 px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center justify-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-white text-center mb-4">
-              Create a Voting Frame on Warpcast
-            </h1>
-            <p className="text-xl text-gray-300 text-center max-w-2xl">
-              Design and launch your custom voting frame for the Warpcast
-              community
-            </p>
-          </div>
-          <div className="">
-            <CreateContestForm />
-          </div>
+        <div className="">
+          <CreateContestForm />
         </div>
-      </AuthKitProvider>
+      </div>
     </div>
   );
 }

@@ -6,7 +6,7 @@ export const runtime = "edge";
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const title = searchParams.get("title") || "Default Title";
-  const description = searchParams.get("description");
+  const deadline = searchParams.get("deadline") || "No deadline set";
 
   try {
     // Load the background image
@@ -49,23 +49,21 @@ export async function GET(request: NextRequest) {
                 fontWeight: "bold",
                 color: "white",
                 textAlign: "center",
-                marginBottom: description ? "20px" : 0,
+                marginBottom: "20px",
               }}
             >
               {title}
             </h1>
-            {description && (
-              <p
-                style={{
-                  fontSize: 32,
-                  color: "white",
-                  textAlign: "center",
-                  margin: 0,
-                }}
-              >
-                {description}
-              </p>
-            )}
+            <p
+              style={{
+                fontSize: 32,
+                color: "white",
+                textAlign: "center",
+                margin: 0,
+              }}
+            >
+              Deadline: {new Date(deadline).toLocaleString()}
+            </p>
           </div>
         </div>
       ),

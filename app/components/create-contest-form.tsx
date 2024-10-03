@@ -35,17 +35,15 @@ const formSchema = z.object({
   deadline: z.date({
     required_error: "A deadline is required.",
   }),
-  options: z.array(z.string()).min(2).max(4),
+  options: z.array(z.string()).length(2),
 });
 
 export function CreateContestForm() {
   const router = useRouter();
-  const [options, setOptions] = useState(["Yes", "No"]);
   const [isAnimating, setIsAnimating] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
-    // Keep the animation running continuously
     setIsAnimating(true);
   }, []);
 
@@ -59,7 +57,7 @@ export function CreateContestForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const response = await fetch("/api/votes", {
+      const response = await fetch("/api/vote-creation", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -77,30 +75,17 @@ export function CreateContestForm() {
       setShowConfetti(true);
       setTimeout(() => {
         setShowConfetti(false);
-        router.push(`/contests/${data.voteId}`);
+        const voteUrl = `${window.location.origin}/advanced/${data.voteId}`; // This line is updated
+        navigator.clipboard.writeText(voteUrl).then(() => {
+          alert(`Vote created! URL copied to clipboard: ${voteUrl}`);
+          router.push(voteUrl);
+        });
       }, 3000);
     } catch (error) {
       console.error("Error creating vote:", error);
-      // TODO: Show error message to user
+      alert("Failed to create vote. Please try again.");
     }
   }
-
-  const handleAddOption = () => {
-    if (options.length < 4) {
-      const currentOptions = form.getValues().options || [];
-      const newOptions = [...currentOptions, ""];
-      setOptions(newOptions);
-      form.setValue("options", newOptions);
-    }
-  };
-
-  const handleDeleteOption = (index: number) => {
-    if (options.length > 2) {
-      const newOptions = options.filter((_, i) => i !== index);
-      setOptions(newOptions);
-      form.setValue("options", newOptions);
-    }
-  };
 
   const formVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -203,10 +188,8 @@ export function CreateContestForm() {
                 )}
               />
               <div className="space-y-4">
-                <FormLabel className="text-white">
-                  Choose Vote Options
-                </FormLabel>
-                {options.map((option, index) => (
+                <FormLabel className="text-white">Vote Options</FormLabel>
+                {["Yes", "No"].map((option, index) => (
                   <FormField
                     key={index}
                     control={form.control}
@@ -214,53 +197,17 @@ export function CreateContestForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <div className="flex items-center space-x-2 mt-2">
-                            <Input
-                              placeholder={`Option ${index + 1}`}
-                              {...field}
-                              className="flex-grow bg-white text-black"
-                            />
-                            {options.length > 2 && (
-                              <motion.div
-                                variants={buttonVariants}
-                                initial="rest"
-                                whileHover="hover"
-                                whileTap="tap"
-                              >
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleDeleteOption(index)}
-                                  className="flex-shrink-0 bg-[#1A1A1A] hover:bg-white text-white hover:text-[#1A1A1A] transition-colors duration-200"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </motion.div>
-                            )}
-                          </div>
+                          <Input
+                            placeholder={option}
+                            {...field}
+                            className="bg-white text-black"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 ))}
-                {options.length < 4 && (
-                  <motion.div
-                    variants={buttonVariants}
-                    initial="rest"
-                    whileHover="hover"
-                    whileTap="tap"
-                  >
-                    <Button
-                      type="button"
-                      onClick={handleAddOption}
-                      className="bg-[#1A1A1A] hover:bg-white text-white hover:text-[#1A1A1A] transition-colors duration-200"
-                    >
-                      Add Option
-                    </Button>
-                  </motion.div>
-                )}
                 <motion.div
                   variants={buttonVariants}
                   initial="rest"
