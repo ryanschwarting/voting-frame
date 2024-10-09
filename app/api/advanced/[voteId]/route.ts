@@ -6,6 +6,14 @@ import {
 import { NextRequest, NextResponse } from "next/server";
 import { kv } from "@vercel/kv";
 
+/**
+ * Handles the main logic for processing a vote request.
+ * This function:
+ * 1. Retrieves vote data from the KV store
+ * 2. Checks if the user has already voted
+ * 3. Processes the vote if a valid button was clicked
+ * 4. Returns either the initial vote page or the results page
+ */
 async function getResponse(
   req: NextRequest,
   voteId: string
@@ -93,6 +101,13 @@ async function getResponse(
   );
 }
 
+/**
+ * Generates and returns the results page for a completed vote.
+ * This function:
+ * 1. Retrieves the vote data and calculates the results
+ * 2. Prepares the results image URL with vote statistics
+ * 3. Returns a frame response with the results image
+ */
 async function getResultsResponse(
   voteId: string,
   title: string
@@ -162,7 +177,11 @@ async function getResultsResponse(
   );
 }
 
-// Main POST handler for the API route
+/**
+ * Main POST handler for the API route.
+ * This function serves as the entry point for incoming POST requests,
+ * delegating the processing to the getResponse function.
+ */
 export async function POST(
   req: NextRequest,
   { params }: { params: { voteId: string } }

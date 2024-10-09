@@ -43,7 +43,9 @@ const formSchema = z.object({
   deadline: z.date({
     required_error: "A deadline is required.",
   }),
-  options: z.array(z.string().min(1, "Option cannot be empty")).length(2),
+  options: z
+    .array(z.string().min(1, "Option cannot be empty"))
+    .max(2, "You need to have 3 options"),
 });
 
 export function CreateContestForm() {
@@ -168,6 +170,7 @@ export function CreateContestForm() {
         </DialogContent>
       </Dialog>
 
+      {/* Confetti animation */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[70] pointer-events-none">
           <Confetti
