@@ -23,11 +23,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon, Trash2 } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
-// Add these imports
 import {
   Dialog,
   DialogContent,
@@ -36,6 +35,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
+// Define the form schema using Zod
 const formSchema = z.object({
   title: z.string().min(2, {
     message: "Title must be at least 2 characters.",
@@ -48,16 +48,18 @@ const formSchema = z.object({
 
 export function CreateContestForm() {
   const router = useRouter();
+  // State variables for UI interactions
   const [isAnimating, setIsAnimating] = useState(true);
-  const [showConfetti, setShowConfetti] = useState(false);
-  // Add these state variables
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [voteUrl, setVoteUrl] = useState("");
+  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
 
+  // Start animation on component mount
   useEffect(() => {
     setIsAnimating(true);
   }, []);
 
+  // Initialize form with react-hook-form and zod resolver
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -66,8 +68,10 @@ export function CreateContestForm() {
     },
   });
 
+  // Handle form submission
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
+      // Send form data to API
       const response = await fetch("/api/vote-creation", {
         method: "POST",
         headers: {
@@ -83,19 +87,17 @@ export function CreateContestForm() {
       const data = await response.json();
       console.log("Vote created:", data);
 
-      setShowConfetti(true);
-      setTimeout(() => {
-        setShowConfetti(false);
-        const newVoteUrl = `${window.location.origin}/advanced/${data.voteId}`;
-        setVoteUrl(newVoteUrl);
-        setIsModalOpen(true);
-      }, 3000);
+      // Prepare result URL and show modal immediately
+      const newVoteUrl = `${window.location.origin}/advanced/${data.voteId}`;
+      setVoteUrl(newVoteUrl);
+      setIsModalOpen(true);
     } catch (error) {
       console.error("Error creating vote:", error);
       alert("Failed to create vote. Please try again.");
     }
   }
 
+  // Animation variants for form and button
   const formVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
@@ -114,9 +116,72 @@ export function CreateContestForm() {
     tap: { scale: 0.9 },
   };
 
+  // Update window size
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+
+    // Set initial size
+    handleResize();
+
+    // Add event listener
+    window.addEventListener("resize", handleResize);
+
+    // Cleanup
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
-    <div className="w-full max-w-lg mx-auto px-4 sm:px-6 lg:px-8">
-      {showConfetti && <Confetti />}
+    <div className="w-full max-w-lg mx-auto px-4 sm:px-6 lg:px-8 relative">
+      {/* Semi-transparent background overlay */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[60]" />
+      )}
+
+      {/* Success modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="z-[65]">
+          <DialogHeader>
+            <DialogTitle>Vote Created Successfully!</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p>Your vote has been created. Here is the URL:</p>
+            <Input
+              value={voteUrl}
+              readOnly
+              className="mt-2"
+              onClick={(e) => e.currentTarget.select()}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                navigator.clipboard.writeText(voteUrl);
+                setIsModalOpen(false);
+                router.push(voteUrl);
+              }}
+            >
+              Copy URL
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[70] pointer-events-none">
+          <Confetti
+            width={windowSize.width}
+            height={windowSize.height}
+            recycle={false}
+            numberOfPieces={1000}
+            gravity={0.1}
+            initialVelocityY={10}
+            tweenDuration={10000}
+          />
+        </div>
+      )}
+
       <motion.div
         className={`
           relative rounded-2xl p-1
@@ -131,6 +196,7 @@ export function CreateContestForm() {
         <div className="bg-[#2C2C2C] rounded-2xl p-2 sm:p-8">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* Title input field */}
               <FormField
                 control={form.control}
                 name="title"
@@ -144,13 +210,11 @@ export function CreateContestForm() {
                         className="bg-white text-black placeholder-gray-400"
                       />
                     </FormControl>
-                    {/* <FormDescription className="text-gray-200">
-                      Enter the title for your contest.
-                    </FormDescription> */}
                     <FormMessage className="text-red-400" />
                   </FormItem>
                 )}
               />
+              {/* Deadline input field with calendar */}
               <FormField
                 control={form.control}
                 name="deadline"
@@ -215,6 +279,7 @@ export function CreateContestForm() {
               />
               <div className="space-y-4">
                 <FormLabel className="text-white">Vote Options</FormLabel>
+                {/* Render two option input fields */}
                 {[0, 1].map((index) => (
                   <FormField
                     key={index}
@@ -234,6 +299,7 @@ export function CreateContestForm() {
                     )}
                   />
                 ))}
+                {/* Submit button with animation */}
                 <motion.div
                   variants={buttonVariants}
                   initial="rest"
@@ -259,35 +325,6 @@ export function CreateContestForm() {
           </Form>
         </div>
       </motion.div>
-
-      {/* Add the Dialog component */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Vote Created Successfully!</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p>Your vote has been created. Here is the URL:</p>
-            <Input
-              value={voteUrl}
-              readOnly
-              className="mt-2"
-              onClick={(e) => e.currentTarget.select()}
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              onClick={() => {
-                navigator.clipboard.writeText(voteUrl);
-                setIsModalOpen(false);
-                router.push(voteUrl);
-              }}
-            >
-              Copy URL
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

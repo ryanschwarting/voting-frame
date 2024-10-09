@@ -940,12 +940,6 @@ The chosen technology stack offers numerous advantages for rapid and efficient a
    - Automatic HTTPS and custom domain support.
    - Easy scaling and global content delivery.
 
-Compared to alternative stacks:
-
-- **LAMP Stack**: The chosen stack offers better performance, easier scaling, and more modern development practices.
-- **MEAN Stack**: While similar in some aspects, the chosen stack provides better TypeScript integration and simpler deployment.
-- **Ruby on Rails**: The chosen stack offers better frontend performance and easier scaling for high-traffic applications.
-
 ## 10. Conclusion
 
 This web application demonstrates an efficient and modern approach to creating interactive voting frames for Warpcast users. By leveraging Next.js, TypeScript, Tailwind CSS, and Vercel's ecosystem, it achieves a balance of performance, scalability, and developer productivity.

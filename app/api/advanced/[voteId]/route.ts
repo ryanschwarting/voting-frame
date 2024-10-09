@@ -10,11 +10,16 @@ async function getResponse(
   req: NextRequest,
   voteId: string
 ): Promise<NextResponse> {
+  // Parse the incoming request body
   const body: FrameRequest = await req.json();
   const { untrustedData } = body;
 
+  // Retrieve vote data from KV store
   const voteData = await kv.hgetall(`vote:${voteId}`);
   console.log("voteData:", voteData);
+
+  // Handle case where vote is not found
+  // Use getFrameHtmlResponse for user verification error
 
   if (!voteData) {
     return new NextResponse(
@@ -29,10 +34,10 @@ async function getResponse(
   const { title, deadline, options } = voteData;
   console.log("options:", options);
 
-  // Ensure options is an array
+  // Ensure options is always an array
   const parsedOptions = Array.isArray(options) ? options : [options];
 
-  // Check if the user has already voted
+  // Extract user ID from untrusted data
   const userId = untrustedData.fid?.toString();
   if (!userId) {
     return new NextResponse(
@@ -44,22 +49,25 @@ async function getResponse(
     );
   }
 
+  // Check if user has already voted
   const hasVoted = await kv.sismember(`votedUsers:${voteId}`, userId);
   if (hasVoted) {
     return getResultsResponse(voteId, title as string);
   }
 
-  // Handle the vote
+  // Process the vote if a valid button was clicked
   if (
     untrustedData.buttonIndex &&
     untrustedData.buttonIndex <= parsedOptions.length
   ) {
+    // Increment vote count and add user to voted set
     await kv.incr(`votes:${voteId}:${untrustedData.buttonIndex}`);
     await kv.sadd(`votedUsers:${voteId}`, userId);
     return getResultsResponse(voteId, title as string);
   }
 
-  // Initial vote page
+  // Prepare buttons for initial vote page
+  // Prepare buttons using FrameButtonMetadata type
   const buttons: [FrameButtonMetadata, ...FrameButtonMetadata[]] =
     parsedOptions.length > 0
       ? (parsedOptions.map((option: string) => ({ label: option })) as [
@@ -68,6 +76,8 @@ async function getResponse(
         ])
       : [{ label: "No options available" }];
 
+  // Return initial vote page response
+  // Use getFrameHtmlResponse to create the initial vote page response
   return new NextResponse(
     getFrameHtmlResponse({
       buttons: buttons,
@@ -87,12 +97,14 @@ async function getResultsResponse(
   voteId: string,
   title: string
 ): Promise<NextResponse> {
+  // Retrieve vote data
   const voteData = await kv.hgetall(`vote:${voteId}`);
 
   if (!voteData || !voteData.options) {
     throw new Error("Invalid vote data");
   }
 
+  // Parse options, handling different data formats
   let options: string[];
   if (typeof voteData.options === "string") {
     try {
@@ -108,13 +120,16 @@ async function getResultsResponse(
 
   console.log("Parsed options:", options);
 
+  // Fetch vote counts for each option
   const voteCounts = await Promise.all(
     options.map((_, index) => kv.get(`votes:${voteId}:${index + 1}`))
   );
 
+  // Convert vote counts to numbers and calculate total
   const typedVoteCounts = voteCounts.map((count) => Number(count) || 0);
   const totalVotes = typedVoteCounts.reduce((sum, count) => sum + count, 0);
 
+  // Calculate results with percentages
   const results = options.map((option, index) => {
     const count = typedVoteCounts[index];
     const percentage = totalVotes > 0 ? (count / totalVotes) * 100 : 0;
@@ -127,6 +142,7 @@ async function getResultsResponse(
 
   console.log("Calculated results:", results);
 
+  // Prepare URL parameters for results image
   const searchParams = new URLSearchParams({
     title,
     results: JSON.stringify(results),
@@ -134,6 +150,8 @@ async function getResultsResponse(
 
   const imageUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/og?${searchParams}`;
 
+  // Return results response
+  // Use getFrameHtmlResponse to create the results response
   return new NextResponse(
     getFrameHtmlResponse({
       image: {
@@ -144,6 +162,7 @@ async function getResultsResponse(
   );
 }
 
+// Main POST handler for the API route
 export async function POST(
   req: NextRequest,
   { params }: { params: { voteId: string } }
@@ -151,4 +170,5 @@ export async function POST(
   return getResponse(req, params.voteId);
 }
 
+// Ensure the route is not cached
 export const dynamic = "force-dynamic";
